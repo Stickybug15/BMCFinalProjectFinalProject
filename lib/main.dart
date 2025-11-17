@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
         scaffoldBackgroundColor: craftCream,
-        textTheme: GoogleFonts.latoTextTheme(
+        textTheme: GoogleFonts.robotoTextTheme(
           ThemeData(brightness: Brightness.light).textTheme,
         ).apply(
           bodyColor: craftCharcoal,
