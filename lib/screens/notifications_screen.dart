@@ -13,58 +13,60 @@ class NotificationsScreen extends StatefulWidget {
 class _NotificationsScreenState extends State<NotificationsScreen> {
   final User? _user = FirebaseAuth.instance.currentUser;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  bool _showUnread = true;
 
-  // 1. This function will mark all unread notifications as "read"
-  void _markNotificationsAsRead(List<QueryDocumentSnapshot> docs) {
-    // 2. Use a "WriteBatch" to update multiple documents at once
-    final batch = _firestore.batch();
-
-    for (var doc in docs) {
-      if (doc['isRead'] == false) {
-        // 3. If it's unread, add an "update" operation to the batch
-        batch.update(doc.reference, {'isRead': true});
-      }
-    }
-
-    // 4. "Commit" the batch, sending all updates to Firestore
-    batch.commit();
+  Future<void> _markNotificationAsRead(String notificationId) async {
+    await _firestore
+        .collection('notifications')
+        .doc(notificationId)
+        .update({'isRead': true});
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Notifications')),
+      appBar: AppBar(
+        title: const Text('Notifications'),
+        actions: [
+          FilterChip(
+            label: Text(_showUnread ? 'Unread' : 'All'),
+            selected: _showUnread,
+            onSelected: (bool selected) {
+              setState(() {
+                _showUnread = selected;
+              });
+            },
+          )
+        ],
+      ),
       body: _user == null
           ? const Center(child: Text('Please log in.'))
           : StreamBuilder<QuerySnapshot>(
-              // 5. Get ALL notifications for this user, newest first
               stream: _firestore
                   .collection('notifications')
                   .where('userId', isEqualTo: _user.uid)
+                  .where('isRead', isEqualTo: _showUnread ? false : null)
                   .orderBy('createdAt', descending: true)
                   .snapshots(),
-
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(
-                    child: Text('You have no notifications.'),
+                  return Center(
+                    child: Text(_showUnread
+                        ? 'You have no unread notifications.'
+                        : 'You have no notifications.'),
                   );
                 }
 
                 final docs = snapshot.data!.docs;
 
-                // 6. --- IMPORTANT ---
-                //    As soon as we have the notifications,
-                //    we call our function to mark them as read.
-                _markNotificationsAsRead(docs);
-
                 return ListView.builder(
                   itemCount: docs.length,
                   itemBuilder: (context, index) {
-                    final data = docs[index].data() as Map<String, dynamic>;
+                    final doc = docs[index];
+                    final data = doc.data() as Map<String, dynamic>;
                     final timestamp = (data['createdAt'] as Timestamp?);
                     final formattedDate = timestamp != null
                         ? DateFormat(
@@ -72,32 +74,46 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           ).format(timestamp.toDate())
                         : '';
 
-                    // 7. Check if this notification was *just* read
-                    final bool wasUnread = data['isRead'] == false;
-
-                    return ListTile(
-                      // 8. Show a "new" icon if it was unread
-                      leading: wasUnread
-                          ? const Icon(
-                              Icons.circle,
-                              color: Colors.deepPurple,
-                              size: 12,
-                            )
-                          : const Icon(
-                              Icons.circle_outlined,
-                              color: Colors.grey,
-                              size: 12,
+                    return Dismissible(
+                      key: Key(doc.id),
+                      onDismissed: (direction) {
+                        _markNotificationAsRead(doc.id);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('Notification marked as read'),
+                            action: SnackBarAction(
+                              label: 'Undo',
+                              onPressed: () {
+                                _firestore
+                                    .collection('notifications')
+                                    .doc(doc.id)
+                                    .update({'isRead': false});
+                              },
                             ),
-                      title: Text(
-                        data['title'] ?? 'No Title',
-                        style: TextStyle(
-                          fontWeight: wasUnread
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                        ),
+                          ),
+                        );
+                      },
+                      background: Container(
+                        color: Colors.green,
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: const Icon(Icons.check, color: Colors.white),
                       ),
-                      subtitle: Text('${data['body'] ?? ''}\n$formattedDate'),
-                      isThreeLine: true,
+                      child: ListTile(
+                        leading: const Icon(
+                          Icons.circle,
+                          color: Colors.deepPurple,
+                          size: 12,
+                        ),
+                        title: Text(
+                          data['title'] ?? 'No Title',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        subtitle: Text('${data['body'] ?? ''}\n$formattedDate'),
+                        isThreeLine: true,
+                      ),
                     );
                   },
                 );

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer' as developer;
 import 'signup_screen.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // 2. Add a loading state variable
   bool _isLoading = false;
+  bool _isPasswordVisible = false;
+  Timer? _passwordVisibilityTimer;
 
   // 3. Get an instance of FirebaseAuth
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -31,6 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _passwordVisibilityTimer?.cancel();
     super.dispose();
   }
 
@@ -80,6 +84,22 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  void _togglePasswordVisibility() {
+    setState(() {
+      _isPasswordVisible = !_isPasswordVisible;
+      if (_isPasswordVisible) {
+        _passwordVisibilityTimer?.cancel(); // Cancel any existing timer
+        _passwordVisibilityTimer = Timer(const Duration(seconds: 5), () {
+          if (mounted) {
+            setState(() {
+              _isPasswordVisible = false;
+            });
+          }
+        });
+      }
+    });
   }
 
   @override
@@ -132,10 +152,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 // 8. The Password Text Field
                 TextFormField(
                   controller: _passwordController, // 9. Link the controller
-                  obscureText: true, // 10. This hides the password
-                  decoration: const InputDecoration(
+                  obscureText: !_isPasswordVisible, // 10. This hides the password
+                  decoration: InputDecoration(
                     labelText: 'Password',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                      ),
+                      onPressed: _togglePasswordVisibility,
+                    ),
                   ),
                   // 11. Validator function
                   validator: (value) {

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:ecommerce_app/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // 1. Add Firebase Auth import
@@ -22,6 +23,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   // 2. Add loading state and auth instance
   bool _isLoading = false;
+  bool _isPasswordVisible = false;
+  Timer? _passwordVisibilityTimer;
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore =
       FirebaseFirestore.instance; // 2. ADD THIS
@@ -31,6 +35,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _passwordVisibilityTimer?.cancel();
     super.dispose();
   }
 
@@ -75,6 +80,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
     }
   }
+
+    void _togglePasswordVisibility() {
+    setState(() {
+      _isPasswordVisible = !_isPasswordVisible;
+      if (_isPasswordVisible) {
+        _passwordVisibilityTimer?.cancel(); // Cancel any existing timer
+        _passwordVisibilityTimer = Timer(const Duration(seconds: 5), () {
+          if (mounted) {
+            setState(() {
+              _isPasswordVisible = false;
+            });
+          }
+        });
+      }
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -125,10 +147,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 // 8. The Password Text Field
                 TextFormField(
                   controller: _passwordController, // 9. Link the controller
-                  obscureText: true, // 10. This hides the password
-                  decoration: const InputDecoration(
+                  obscureText: !_isPasswordVisible, // 10. This hides the password
+                  decoration: InputDecoration(
                     labelText: 'Password',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
+                     suffixIcon: IconButton(
+                      icon: Icon(
+                        _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                      ),
+                      onPressed: _togglePasswordVisibility,
+                    ),
                   ),
                   // 11. Validator function
                   validator: (value) {
