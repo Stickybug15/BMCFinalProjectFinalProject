@@ -51,6 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       // 3. This is the Firebase command to sign in
+      await _auth.signOut();
       await _auth.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
