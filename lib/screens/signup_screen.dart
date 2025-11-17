@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'package:ecommerce_app/screens/login_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // 1. Add Firebase Auth import
-import 'package:cloud_firestore/cloud_firestore.dart'; // 1. ADD THIS IMPORT
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-// 1. Create a StatefulWidget
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
@@ -12,25 +11,17 @@ class SignUpScreen extends StatefulWidget {
   State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-// 2. This is the State class
 class _SignUpScreenState extends State<SignUpScreen> {
-  // 3. Create a GlobalKey for the Form
   final _formKey = GlobalKey<FormState>();
-
-  // 4. Create TextEditingControllers
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
-  // 2. Add loading state and auth instance
   bool _isLoading = false;
   bool _isPasswordVisible = false;
   Timer? _passwordVisibilityTimer;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore =
-      FirebaseFirestore.instance; // 2. ADD THIS
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // 5. Clean up controllers when the widget is removed
   @override
   void dispose() {
     _emailController.dispose();
@@ -40,38 +31,57 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> _signUp() async {
-    // 1. This part is the same: validate the form
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    // 2. This is the same: set loading to true
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // 3. This is the same: create the user
-      final UserCredential userCredential = await _auth
-          .createUserWithEmailAndPassword(
-            email: _emailController.text.trim(),
-            password: _passwordController.text.trim(),
-          );
+      final UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
 
-      // 4. --- THIS IS THE NEW PART ---
-      // After creating the user, save their info to Firestore
       if (userCredential.user != null) {
-        // 5. Create a document in a 'users' collection
-        //    We use the user's unique UID as the document ID
         await _firestore.collection('users').doc(userCredential.user!.uid).set({
           'email': _emailController.text.trim(),
-          'role': 'user', // 6. Set the default role to 'user'
-          'createdAt': FieldValue.serverTimestamp(), // For our records
+          'role': 'user',
+          'createdAt': FieldValue.serverTimestamp(),
         });
       }
-      // 7. The AuthWrapper will handle navigation automatically
-      // ...
-    } on FirebaseAuthException {
-      // ... (your existing error handling)
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+
+      String message;
+      if (e.code == 'email-already-in-use') {
+        message = 'An account already exists. Redirecting to login...';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message), backgroundColor: Colors.blue),
+        );
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+        return;
+      } else if (e.code == 'weak-password') {
+        message = 'The password provided is too weak.';
+      } else {
+        message = 'An unknown error occurred. Please try again.';
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: Colors.red),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An unexpected error occurred: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -81,11 +91,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-    void _togglePasswordVisibility() {
+  void _togglePasswordVisibility() {
     setState(() {
       _isPasswordVisible = !_isPasswordVisible;
       if (_isPasswordVisible) {
-        _passwordVisibilityTimer?.cancel(); // Cancel any existing timer
+        _passwordVisibilityTimer?.cancel();
         _passwordVisibilityTimer = Timer(const Duration(seconds: 5), () {
           if (mounted) {
             setState(() {
@@ -97,39 +107,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
-    // 1. A Scaffold provides the basic screen structure
     return Scaffold(
       appBar: AppBar(title: const Text('Sign Up')),
-      // 2. SingleChildScrollView prevents the keyboard from
-      //    causing a "pixel overflow" error
       body: SingleChildScrollView(
         child: Padding(
-          // 3. Add padding around the form
           padding: const EdgeInsets.all(16.0),
-          // 4. The Form widget acts as a container for our fields
           child: Form(
-            key: _formKey, // 5. Assign our key to the Form
-            // 6. A Column arranges its children vertically
+            key: _formKey,
             child: Column(
-              // 7. Center the contents of the column
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // 1. A spacer
                 const SizedBox(height: 20),
-
-                // 2. The Email Text Field
                 TextFormField(
-                  controller: _emailController, // 3. Link the controller
+                  controller: _emailController,
                   decoration: const InputDecoration(
                     labelText: 'Email',
-                    border: OutlineInputBorder(), // 4. Nice border
+                    border: OutlineInputBorder(),
                   ),
-                  keyboardType:
-                      TextInputType.emailAddress, // 5. Show '@' on keyboard
-                  // 6. Validator function
+                  keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your email';
@@ -137,28 +134,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     if (!value.contains('@')) {
                       return 'Please enter a valid email';
                     }
-                    return null; // 'null' means the input is valid
+                    return null;
                   },
                 ),
-
-                // 7. A spacer
                 const SizedBox(height: 16),
-
-                // 8. The Password Text Field
                 TextFormField(
-                  controller: _passwordController, // 9. Link the controller
-                  obscureText: !_isPasswordVisible, // 10. This hides the password
+                  controller: _passwordController,
+                  obscureText: !_isPasswordVisible,
                   decoration: InputDecoration(
                     labelText: 'Password',
                     border: const OutlineInputBorder(),
-                     suffixIcon: IconButton(
+                    suffixIcon: IconButton(
                       icon: Icon(
-                        _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                        _isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                       ),
                       onPressed: _togglePasswordVisibility,
                     ),
                   ),
-                  // 11. Validator function
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your password';
@@ -169,18 +163,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     return null;
                   },
                 ),
-                // 1. A spacer
                 const SizedBox(height: 20),
-
-                // 2. The Login Button
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(50), // 3. Make it wide
+                    minimumSize: const Size.fromHeight(50),
                   ),
-
-                  // 1. Call our new _signUp function
                   onPressed: _signUp,
-
                   child: _isLoading
                       ? const CircularProgressIndicator(
                           valueColor: AlwaysStoppedAnimation<Color>(
@@ -189,21 +177,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         )
                       : const Text('Sign Up'),
                 ),
-
-                // 6. A spacer
                 const SizedBox(height: 10),
-
-                // 7. The "Sign Up" toggle button
                 TextButton(
                   onPressed: () {
-                    // 3. Navigate BACK to the Login screen
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
                         builder: (context) => const LoginScreen(),
                       ),
                     );
                   },
-                  // CHANGE 4
                   child: const Text("Already have an account? Login"),
                 ),
               ],
