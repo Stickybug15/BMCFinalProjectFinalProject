@@ -1,4 +1,5 @@
 import 'dart:async'; 
+import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart'; 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -50,7 +51,7 @@ class CartProvider with ChangeNotifier {
 
   CartProvider() {
     initializeAuthListener();
-    print('CartProvider created and auth listener initialized.');
+    developer.log('CartProvider created and auth listener initialized.');
   }
 
   double get subtotal {
@@ -86,14 +87,14 @@ class CartProvider with ChangeNotifier {
 
  
   void initializeAuthListener() {
-    print('CartProvider auth listener initialized');
+    developer.log('CartProvider auth listener initialized');
     _authSubscription = _auth.authStateChanges().listen((User? user) {
       if (user == null) {
-        print('User logged out, clearing cart.');
+        developer.log('User logged out, clearing cart.');
         _userId = null;
         _items = [];
       } else {
-        print('User logged in: ${user.uid}. Fetching cart...');
+        developer.log('User logged in: ${user.uid}. Fetching cart...');
         _userId = user.uid;
         _fetchCart();
       }
@@ -156,8 +157,8 @@ class CartProvider with ChangeNotifier {
       
 
     } catch (e) {
-      print('Error placing order: $e');
-      throw e;
+      developer.log('Error placing order: $e');
+      rethrow;
     }
   }
 
@@ -172,9 +173,9 @@ class CartProvider with ChangeNotifier {
         await _firestore.collection('userCarts').doc(_userId).set({
           'cartItems': [],
         });
-        print('Firestore cart cleared.');
+        developer.log('Firestore cart cleared.');
       } catch (e) {
-        print('Error clearing Firestore cart: $e');
+        developer.log('Error clearing Firestore cart: $e');
       }
     }
 
@@ -195,13 +196,13 @@ class CartProvider with ChangeNotifier {
 
         
         _items = cartData.map((item) => CartItem.fromJson(item)).toList();
-        print('Cart fetched successfully: ${_items.length} items');
+        developer.log('Cart fetched successfully: ${_items.length} items');
       } else {
        
         _items = [];
       }
     } catch (e) {
-      print('Error fetching cart: $e');
+      developer.log('Error fetching cart: $e');
       _items = []; 
     }
     notifyListeners(); 
@@ -221,9 +222,9 @@ class CartProvider with ChangeNotifier {
       await _firestore.collection('userCarts').doc(_userId).set({
         'cartItems': cartData,
       });
-      print('Cart saved to Firestore');
+      developer.log('Cart saved to Firestore');
     } catch (e) {
-      print('Error saving cart: $e');
+      developer.log('Error saving cart: $e');
     }
   }
 }

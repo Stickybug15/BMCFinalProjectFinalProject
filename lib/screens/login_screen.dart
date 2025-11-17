@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'signup_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // 1. Add Firebase Auth import
@@ -63,12 +64,13 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       // 6. Show the error message in a SnackBar
+      if(!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message), backgroundColor: Colors.red),
       );
     } catch (e) {
       // 7. Catch any other general errors
-      print(e);
+      developer.log(e.toString());
     }
 
     // 8. ALWAYS set loading to false at the end

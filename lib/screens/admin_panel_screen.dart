@@ -50,7 +50,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
         'imageUrl': imageUrl,
         'createdAt': FieldValue.serverTimestamp(),
       });
-
+      if(!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Product uploaded successfully!')),
       );

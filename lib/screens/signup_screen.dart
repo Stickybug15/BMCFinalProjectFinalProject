@@ -65,7 +65,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
       // 7. The AuthWrapper will handle navigation automatically
       // ...
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseAuthException {
       // ... (your existing error handling)
     } finally {
       if (mounted) {

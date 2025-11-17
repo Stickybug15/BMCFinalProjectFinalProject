@@ -38,7 +38,7 @@ class ProductCard extends StatelessWidget {
                     child: Icon(
                       Icons.broken_image,
                       size: 40,
-                      color: theme.colorScheme.onSurface.withOpacity(0.4),
+                      color: theme.colorScheme.onSurface.withAlpha(102),
                     ),
                   );
                 },

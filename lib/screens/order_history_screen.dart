@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -33,7 +34,7 @@ class OrderHistoryScreen extends StatelessWidget {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                print(snapshot.error);
+                developer.log(snapshot.error.toString());
                 // 9. Handle error state
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));

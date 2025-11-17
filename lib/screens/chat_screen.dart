@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce_app/widgets/chat_bubble.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -108,7 +109,7 @@ class _ChatScreenState extends State<ChatScreen> {
       );
 
     } catch (e) {
-      print("Error sending message: $e");
+      developer.log("Error sending message: $e");
     }
   }
 

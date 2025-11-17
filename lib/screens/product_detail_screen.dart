@@ -68,7 +68,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     child: Icon(
                       Icons.broken_image,
                       size: 100,
-                      color: theme.colorScheme.onSurface.withOpacity(0.4),
+                      color: theme.colorScheme.onSurface.withAlpha(102),
                     ),
                   ),
                 );

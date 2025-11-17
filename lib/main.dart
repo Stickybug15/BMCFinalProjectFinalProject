@@ -45,11 +45,9 @@ class MyApp extends StatelessWidget {
           brightness: Brightness.light,
           primary: craftOrange,
           secondary: craftBrown,
-          background: craftCream,
-          surface: Colors.white,
+          surface: craftCream,
           onPrimary: Colors.white,
           onSecondary: Colors.white,
-          onBackground: craftCharcoal,
           onSurface: craftCharcoal,
           error: craftRed,
           onError: Colors.white,
@@ -75,9 +73,9 @@ class MyApp extends StatelessWidget {
         inputDecorationTheme: InputDecorationTheme(
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: craftCharcoal.withOpacity(0.5)),
+            borderSide: BorderSide(color: craftCharcoal.withAlpha(128)),
           ),
-          labelStyle: TextStyle(color: craftCharcoal.withOpacity(0.8)),
+          labelStyle: TextStyle(color: craftCharcoal.withAlpha(204)),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: craftOrange, width: 2.0),

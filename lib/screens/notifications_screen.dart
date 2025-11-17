@@ -40,7 +40,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               // 5. Get ALL notifications for this user, newest first
               stream: _firestore
                   .collection('notifications')
-                  .where('userId', isEqualTo: _user!.uid)
+                  .where('userId', isEqualTo: _user.uid)
                   .orderBy('createdAt', descending: true)
                   .snapshots(),
 

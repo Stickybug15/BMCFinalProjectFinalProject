@@ -1,4 +1,4 @@
-
+import 'dart:developer' as developer;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -48,6 +48,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await _currentUser!.updatePassword(_newPasswordController.text);
 
       // 4. Show success message
+      if(!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Password changed successfully!'),
@@ -61,13 +62,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     } on FirebaseAuthException catch (e) {
       // 5. Handle errors
+      if(!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to change password: ${e.message}'),
           backgroundColor: Colors.red,
         ),
       );
-      print("Error changing password: ${e.code}");
+      developer.log("Error changing password: ${e.code}");
       // e.code 'requires-recent-login' is a common error
       // This means the user's token is old.
       // You can prompt them to log out and log back in.

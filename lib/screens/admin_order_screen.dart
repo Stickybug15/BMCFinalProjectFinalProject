@@ -147,7 +147,7 @@ class _AdminOrderScreenState extends State<AdminOrderScreen> {
                   ),
                   subtitle: Text(
                     'User: ${orderData['userId']}\n'
-                    'Total: ₱${(orderData['totalPrice']).toStringAsFixed(2)} | Date: $formattedDate',
+                    'Total: $formattedTotal | Date: $formattedDate',
                   ),
                   isThreeLine: true,
 

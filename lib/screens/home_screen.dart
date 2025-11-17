@@ -1,4 +1,5 @@
 // Part 1: Imports
+import 'dart:developer' as developer;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // 1. ADD THIS IMPORT
@@ -49,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
       //    matching the current user's ID
       final doc = await FirebaseFirestore.instance
           .collection('users')
-          .doc(_currentUser!.uid)
+          .doc(_currentUser.uid)
           .get();
 
       // 8. If the document exists...
@@ -60,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       }
     } catch (e) {
-      print("Error fetching user role: $e");
+      developer.log("Error fetching user role: $e");
       // If there's an error, they'll just keep the 'user' role
     }
   }
@@ -274,7 +275,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           builder: (context) => ChatScreen(
 
-                            chatRoomId: _currentUser!.uid,
+                            chatRoomId: _currentUser.uid,
 
                           ),
 
