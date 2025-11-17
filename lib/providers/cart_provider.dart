@@ -82,6 +82,7 @@ class CartProvider with ChangeNotifier {
   @override
   void dispose() {
     _authSubscription?.cancel(); 
+    notifyListeners();
     super.dispose();
   }
 

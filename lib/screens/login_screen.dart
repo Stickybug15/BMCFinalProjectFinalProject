@@ -75,6 +75,10 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       // 7. Catch any other general errors
       developer.log(e.toString());
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+      );
     }
 
     // 8. ALWAYS set loading to false at the end

@@ -1,18 +1,66 @@
-rules_version='2'
+rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      // This rule allows anyone with your database reference to view, edit,
-      // and delete all data in your database. It is useful for getting
-      // started, but it is configured to expire after 30 days because it
-      // leaves your app open to attackers. At that time, all client
-      // requests to your database will be denied.
-      //
-      // Make sure to write security rules for your app before that time, or
-      // else all client requests to your database will be denied until you
-      // update your rules.
-      allow read, write: if request.time < timestamp.date(2025, 12, 17);
+
+    // Helper function to check if the requesting user is an admin.
+    // It reads the 'isAdmin' field from the user's document in the 'users' collection.
+    function isAdmin() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    // Rules for the 'users' collection.
+    match /users/{userId} {
+      // Allow any authenticated user to create their own user document (e.g., on sign-up).
+      allow create: if request.auth != null;
+      // Allow users to read or update their own document.
+      // Admins are also allowed to read or update any user's document.
+      allow read, update: if request.auth.uid == userId || isAdmin();
+    }
+
+    // Rules for the 'products' collection.
+    match /products/{productId} {
+      // Allow anyone (authenticated or not) to view the products.
+      allow read: if true;
+      // Only allow admins to create, update, or delete products.
+      allow write: if isAdmin();
+    }
+    
+    // Rules for the 'userCarts' collection.
+    match /userCarts/{userId} {
+        // Users can only read and write to their own shopping cart.
+        allow read, write: if request.auth.uid == userId;
+    }
+
+    // Rules for the 'orders' collection.
+    match /orders/{orderId} {
+        // Users can read their own orders. Admins can read any order.
+        allow read: if request.auth.uid == resource.data.userId || isAdmin();
+        // Allow authenticated users to create new orders for themselves.
+        allow create: if request.auth.uid == request.resource.data.userId;
+        // Only allow admins to update an order's status.
+        allow update: if isAdmin();
+    }
+    
+    // Rules for the 'notifications' collection.
+    match /notifications/{notificationId} {
+        // Users can read notifications intended for them. Admins can read all notifications.
+        allow read: if request.auth.uid == resource.data.userId || isAdmin();
+        // Allow authenticated users to create notifications for themselves (as used when placing an order).
+        allow create: if request.auth.uid == request.resource.data.userId;
+    }
+
+    // Rules for the 'chats' collection itself.
+    match /chats/{chatRoomId} {
+        allow read, write: if request.auth.uid == chatRoomId || isAdmin();
+    }
+
+    // Rules for the subcollection of messages within a chat.
+    match /chats/{chatRoomId}/messages/{messageId} {
+      // Allow a user to read and write messages if their user ID matches the chat room ID.
+      // This is for the user's side of the chat.
+      // Also, allow admins to read and write to any chat room. This is for the admin's side.
+      allow read, write: if request.auth.uid == chatRoomId || isAdmin();
     }
   }
 }

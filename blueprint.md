@@ -1,16 +1,30 @@
-
 # Project Blueprint
 
 ## Overview
 
-This document outlines the plan for a series of feature enhancements and bug fixes for the eCommerce application.
+This document outlines the architecture, features, and implementation details of the Flutter application. It serves as a single source of truth for the project's design and functionality.
 
-## Current Plan
+## Style and Design
 
-1.  **Implement Show/Hide Password Toggle:** Add a toggle to the password fields on the login and signup screens that automatically hides the password after 5 seconds.
-2.  **Add Hover Effects:** Implement a green hover effect for all buttons.
-3.  **Create Animated Header:** Display a "Welcome" message with a typing animation on the home screen, personalized for "User" or "Admin".
-4.  **Fix Logout Navigation:** Correct the bug that returns the user to the home screen after logout, ensuring it navigates to the login screen.
-5.  **Implement Product Search:** Add a search bar to the home screen to filter the product list.
-6.  **Debug Notification Screen:** Fix the notification screen to correctly display and allow dismissal of notifications.
-7.  **Fix Currency Display:** Ensure the Philippine Peso sign (₱) is displayed correctly for all prices.
+The application follows Material Design principles, with a modern and visually appealing user interface. The color scheme, typography, and component styles are defined in the `ThemeData` object.
+
+## Features
+
+- **User Authentication:** Secure user authentication with Firebase Auth, including sign-up, login, and session management.
+- **Product Catalog:** A comprehensive product catalog with detailed product information, images, and pricing.
+- **Shopping Cart:** A fully functional shopping cart that allows users to add, remove, and manage items.
+- **Order Management:** A complete order management system that allows users to place orders, track their status, and view their order history.
+- **Admin Panel:** A powerful admin panel that allows administrators to manage products, orders, and users.
+- **Real-time Chat:** A real-time chat feature that allows users to communicate with administrators.
+- **Push Notifications:** A push notification system that keeps users informed about their orders and other important updates.
+
+## Error Handling and Crash Reporting
+
+- **Firebase Crashlytics:** Firebase Crashlytics is used to monitor and analyze crashes, providing valuable insights into the application's stability.
+
+## Current Task: Fix `FirebaseException` in `NotificationService`
+
+### Plan
+
+1.  **Add SHA-1 and SHA-256 Fingerprints to Firebase Project:** Add the SHA-1 and SHA-256 fingerprints to the Firebase project to resolve the `AUTHENTICATION_FAILED` error.
+2.  **Add Error Handling to `NotificationService`:** Add error handling to the `NotificationService` to prevent crashes and provide clearer logs if any issues occur with Firebase Cloud Messaging.

@@ -34,7 +34,7 @@ class OrderCard extends StatelessWidget {
         child: ListTile(
           // 7. Title: Total Price
           title: Text(
-            'Total: ₱${(orderData['totalPrice'] as double).toStringAsFixed(2)}',
+            'Total: ₱${(orderData['totalPrice'] as num).toDouble().toStringAsFixed(2)}',
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
           ),
 
