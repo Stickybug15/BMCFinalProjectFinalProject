@@ -107,7 +107,6 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     // 1. A Scaffold provides the basic screen structure
     return Scaffold(
@@ -178,6 +177,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
+
                 // 1. A spacer
                 const SizedBox(height: 20),
 
