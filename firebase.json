@@ -1,1 +1,48 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"pantua-ecommerce-app","appId":"1:1029079198473:android:dbef03c84315d0237f81d8","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"pantua-ecommerce-app","configurations":{"android":"1:1029079198473:android:dbef03c84315d0237f81d8","ios":"1:1029079198473:ios:75cdaacecfb34c147f81d8","macos":"1:1029079198473:ios:75cdaacecfb34c147f81d8","web":"1:1029079198473:web:ad5913dd964685b37f81d8","windows":"1:1029079198473:web:f647a3523d283cd67f81d8"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "pantua-ecommerce-app",
+          "appId": "1:1029079198473:android:dbef03c84315d0237f81d8",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "pantua-ecommerce-app",
+          "configurations": {
+            "android": "1:1029079198473:android:dbef03c84315d0237f81d8",
+            "ios": "1:1029079198473:ios:75cdaacecfb34c147f81d8",
+            "macos": "1:1029079198473:ios:75cdaacecfb34c147f81d8",
+            "web": "1:1029079198473:web:ad5913dd964685b37f81d8",
+            "windows": "1:1029079198473:web:f647a3523d283cd67f81d8"
+          }
+        }
+      }
+    }
+  },
+  "functions": {
+    "source": "functions"
+  },
+  "firestore": {
+    "database": "(default)",
+    "location": "nam5",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

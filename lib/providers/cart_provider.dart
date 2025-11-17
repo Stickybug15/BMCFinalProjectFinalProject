@@ -144,7 +144,7 @@ class CartProvider with ChangeNotifier {
       final double total = totalPriceWithVat;
       final int count = itemCount;
 
-      await _firestore.collection('orders').add({
+      final newOrder = await _firestore.collection('orders').add({
         'userId': _userId,
         'items': cartData,
         'subtotal': sub, 
@@ -155,6 +155,15 @@ class CartProvider with ChangeNotifier {
         'createdAt': FieldValue.serverTimestamp(),
       });
       
+      // Create a notification for the new order
+      await _firestore.collection('notifications').add({
+        'orderId': newOrder.id,
+        'userId': _userId,
+        'title': 'Order Placed!',
+        'body': 'Your order #${newOrder.id.substring(0, 6)} has been placed successfully.',
+        'timestamp': FieldValue.serverTimestamp(),
+        'isRead': false,
+      });
 
     } catch (e) {
       developer.log('Error placing order: $e');
