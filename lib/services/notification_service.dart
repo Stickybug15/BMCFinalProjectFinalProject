@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/services.dart';
 
 class NotificationService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
@@ -27,34 +26,51 @@ class NotificationService {
       // 4. Listen for token refreshes
       _firebaseMessaging.onTokenRefresh.listen(_saveTokenToDatabase);
 
-      // 5. Handle foreground messages
-      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        log('Got a message whilst in the foreground!');
-        log('Message data: ${message.data}');
-
-        if (message.notification != null) {
-          log('Message also contained a notification: ${message.notification}');
-          // Here you could show a local notification using a package like
-          // flutter_local_notifications if you want to.
-        }
-      });
-    } on PlatformException catch (e) {
-      log("Failed to initialize notifications: ${e.message}");
-    } catch (e) {
-      log("An unexpected error occurred during notification initialization: $e");
+    } on FirebaseException catch (e, stackTrace) {
+      // Catch Firebase-specific errors
+      log(
+        'An error occurred during notification initialization: [${e.code}] ${e.message}',
+        error: e,
+        stackTrace: stackTrace,
+        name: 'NotificationService',
+      );
+    } catch (e, stackTrace) {
+      // Catch any other generic errors
+      log(
+        'An unexpected error occurred during notification initialization: $e',
+        error: e,
+        stackTrace: stackTrace,
+        name: 'NotificationService',
+      );
     }
   }
 
   Future<void> _saveTokenToDatabase(String token) async {
-    final User? user = _auth.currentUser;
-    if (user != null) {
-      try {
-        await _firestore.collection('users').doc(user.uid).update({
-          'fcmToken': token,
-        });
-      } catch (e) {
-        log("Error saving FCM token to Firestore: $e");
+    try {
+      final User? user = _auth.currentUser;
+      if (user != null) {
+        // Get a reference to the user's document
+        final userDocRef = _firestore.collection('users').doc(user.uid);
+
+        // Get the document snapshot
+        final userDoc = await userDocRef.get();
+
+        // Get the existing tokens, or an empty list if it doesn't exist
+        final List<dynamic> tokens = userDoc.exists && userDoc.data()!.containsKey('fcmTokens')
+            ? List<dynamic>.from(userDoc.data()!['fcmTokens'] as List)
+            : [];
+
+        // Add the new token if it's not already in the list
+        if (!tokens.contains(token)) {
+          tokens.add(token);
+          await userDocRef.set({'fcmTokens': tokens}, SetOptions(merge: true));
+          log('FCM token saved to Firestore for user: ${user.uid}');
+        }
       }
+    } on FirebaseException catch (e) {
+      log('Error saving FCM token to Firestore: [${e.code}] ${e.message}', name: 'NotificationService');
+    } catch (e) {
+      log('An unexpected error occurred while saving FCM token: $e', name: 'NotificationService');
     }
   }
 }

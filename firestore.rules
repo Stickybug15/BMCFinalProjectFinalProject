@@ -52,7 +52,12 @@ service cloud.firestore {
 
     // Rules for the 'chats' collection itself.
     match /chats/{chatRoomId} {
-        allow read, write: if request.auth.uid == chatRoomId || isAdmin();
+        // Explicitly grant admins permission to list all chats
+        allow list: if isAdmin();
+        // Grant users access to their own chat and admins access to any chat
+        allow get: if request.auth.uid == chatRoomId || isAdmin();
+        // Allow users to write to their own chat and admins to any chat
+        allow write: if request.auth.uid == chatRoomId || isAdmin();
     }
 
     // Rules for the subcollection of messages within a chat.
